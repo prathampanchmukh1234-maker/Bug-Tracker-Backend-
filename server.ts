@@ -71,24 +71,6 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
-  app.get(["/auth/callback", "/auth/callback/"], (_req, res) => {
-    res.send(`
-      <html>
-        <body>
-          <script>
-            if (window.opener) {
-              window.opener.postMessage({ type: 'OAUTH_AUTH_SUCCESS' }, '*');
-              window.close();
-            } else {
-              window.location.href = '/';
-            }
-          </script>
-          <p>Authentication successful. This window should close automatically.</p>
-        </body>
-      </html>
-    `);
-  });
-
   if (isProduction) {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
