@@ -18,3 +18,16 @@ npm run dev
 ```
 
 Default local API URL: `http://localhost:3001`
+
+## Deploy On Render
+
+This repo includes a `render.yaml` file for a Node web service.
+
+Required environment variables on Render:
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+Health check path:
+
+- `/api/health`
