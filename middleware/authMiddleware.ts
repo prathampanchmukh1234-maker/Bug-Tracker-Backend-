@@ -25,6 +25,12 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     next();
   } catch (err) {
     console.error('Auth Middleware Error:', err);
+    const message = err instanceof Error ? err.message : 'Authentication failed';
+
+    if (message.includes('Missing SUPABASE_URL') || message.includes('SUPABASE_SERVICE_ROLE_KEY')) {
+      return res.status(500).json({ error: 'Backend auth configuration is missing. Check SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.' });
+    }
+
     return res.status(401).json({ error: 'Unauthorized: Authentication failed' });
   }
 };

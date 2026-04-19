@@ -4,8 +4,11 @@ import path from "path";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
+import { fileURLToPath } from "url";
 
-dotenv.config();
+const backendDir = path.dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = path.resolve(backendDir, "..");
+dotenv.config({ path: path.join(workspaceRoot, ".env") });
 
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
   console.warn("WARNING: Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Backend functionality will be limited.");
