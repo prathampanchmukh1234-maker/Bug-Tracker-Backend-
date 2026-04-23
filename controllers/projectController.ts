@@ -6,7 +6,6 @@ import { ensureProfileExists } from '../lib/profileHelper.ts';
 export const getProjects = async (req: AuthRequest, res: Response) => {
   if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
   try {
-    // 1. Fetch project IDs the user is a member of
     const { data: membershipData, error: mError } = await supabaseAdmin
       .from('project_members')
       .select('project_id, role')
@@ -20,19 +19,23 @@ export const getProjects = async (req: AuthRequest, res: Response) => {
 
     const projectIds = membershipData.map(m => m.project_id);
 
-    // 2. Fetch full project details for those IDs
     const { data: projectsData, error: pError } = await supabaseAdmin
       .from('projects')
-      .select('*, members:project_members(role, user:profiles(*))')
+      .select('id, title, description, owner_id, updated_at, created_at, members:project_members(user_id)')
       .in('id', projectIds);
 
     if (pError) throw pError;
 
-    // 3. Combine data
     const projects = projectsData.map(project => {
       const membership = membershipData.find(m => m.project_id === project.id);
       return {
-        ...project,
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        owner_id: project.owner_id,
+        updated_at: project.updated_at,
+        created_at: project.created_at,
+        member_count: project.members?.length ?? 0,
         userRole: membership?.role
       };
     });

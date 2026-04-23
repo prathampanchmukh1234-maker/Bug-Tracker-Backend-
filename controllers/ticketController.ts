@@ -52,6 +52,39 @@ export const getTickets = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const getAssignedTicketSummary = async (req: AuthRequest, res: Response) => {
+  if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const { data: memberships, error: membershipError } = await supabaseAdmin
+      .from('project_members')
+      .select('project_id')
+      .eq('user_id', req.user.id);
+
+    if (membershipError) throw membershipError;
+
+    const allowedIds = memberships?.map(m => m.project_id) ?? [];
+
+    if (allowedIds.length === 0) {
+      return res.json([]);
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('tickets')
+      .select('id, title, status, priority, project_id, updated_at, project:projects(title)')
+      .eq('assignee_id', req.user.id)
+      .neq('status', 'Done')
+      .in('project_id', allowedIds)
+      .order('updated_at', { ascending: false })
+      .limit(4);
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const createTicket = async (req: AuthRequest, res: Response) => {
   if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
   const { title, description, priority, type, assignee_id, project_id, status, sprint_name, labels, due_date, parent_ticket_id } = req.body;

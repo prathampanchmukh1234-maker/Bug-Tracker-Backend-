@@ -7,6 +7,7 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.get('/', ticketController.getTickets);
+router.get('/assigned-summary', ticketController.getAssignedTicketSummary);
 router.post('/', ticketController.createTicket);
 router.post('/complete-sprint/:projectId', ticketController.completeSprint); // ← before dynamic /:id
 
